@@ -3,9 +3,37 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.button import MDFlatButton, MDFillRoundFlatIconButton
 from kivymd.uix.dialog import MDDialog
-from kivymd.uix.list import MDList, TwoLineAvatarIconListItem, ImageLeftWidget, IconRightWidget
+from kivymd.uix.list import MDList, TwoLineAvatarIconListItem, ThreeLineAvatarIconListItem, ImageLeftWidget, IconRightWidget
 from kivymd.uix.menu import MDDropdownMenu
 from modules.db import Db, Book, Author, Genre
+
+
+class GenreContent(BoxLayout):
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+
+
+class GenreDialog(MDDialog):
+    def __init__(self, *args, **kwargs):
+        super(GenreDialog, self).__init__(
+            type="custom",
+            content_cls=GenreContent(),
+            title='Nový žánr',
+            size_hint=(.8, 1),
+            buttons=[
+                MDFlatButton(text='Uložit', on_release=self.save_dialog),
+                MDFlatButton(text='Zrušit', on_release=self.cancel_dialog)
+            ]
+        )
+
+    def save_dialog(self, *args):
+        genre = Genre()
+        genre.name = self.content_cls.ids.genre_name.text
+        app.books.database.create_genre(genre)
+        self.dismiss()
+
+    def cancel_dialog(self, *args):
+        self.dismiss()
 
 
 class AuthorContent(BoxLayout):
@@ -42,25 +70,41 @@ class BookContent(BoxLayout):
         if id:
             book = vars(app.books.database.read_by_id(id))
         else:
-            book = {"id": "", "name": "Název knihy", "year": "", "author": "Autor", "genre": ""}
+            book = {"id": "", "name": "Název knihy", "year": "", "author": "Autor", "genre": "Žánr"}
 
         self.ids.book_name.text = book['name']
         authors = app.books.database.read_authors()
-        menu_items = [{"viewclass": "OneLineListItem", "text": f"{author.name}",
+        #genres = app.books.database.read_genres()
+        menu_items_authors = [{"viewclass": "OneLineListItem", "text": f"{author.name}",
                        "on_release": lambda x=f"{author.name}": self.set_item(x)} for author in authors]
+        """menu_items_genres = [{"viewclass": "OneLineListItem", "text": f"{genre.name}",
+                       "on_release": lambda x=f"{genre.name}": self.set_item(x)} for genre in genres]"""
         self.menu_authors = MDDropdownMenu(
             caller=self.ids.author_item,
-            items=menu_items,
+            items=menu_items_authors,
             position="center",
             width_mult=5,
         )
         self.ids.author_item.set_item(book['author'])
         self.ids.author_item.text = book['author']
+        """self.menu_genres = MDDropdownMenu(
+            caller=self.ids.genre_item,
+            items=menu_items_genres,
+            position="center",
+            width_mult=5,
+        )
+        self.ids.genre_item.set_item_g(book['genre'])
+        self.ids.genre_item.text = book['genre']"""
 
     def set_item(self, text_item):
         self.ids.author_item.set_item(text_item)
         self.ids.author_item.text = text_item
         self.menu_authors.dismiss()
+
+    """def set_item(self, text_item):
+        self.ids.genre_item.set_item(text_item)
+        self.ids.genre_item.text = text_item
+        self.menu_genres.dismiss()"""
 
 
 class BookDialog(MDDialog):
@@ -96,6 +140,7 @@ class MyItem(TwoLineAvatarIconListItem):
         self.id = item['id']
         self.text = item['name']
         self.secondary_text = item['author']
+        #self.tertiary_text = item['genre']
         self._no_ripple_effect = True
         self.image = ImageLeftWidget()
         self.image.source = "images/book.png"
@@ -184,7 +229,7 @@ class Books(BoxLayout):
         self.dialog.open()
 
     def on_create_genre(self, *args):
-        self.dialog = AuthorDialog()
+        self.dialog = GenreDialog()
         self.dialog.open()
 
     def create(self, book):

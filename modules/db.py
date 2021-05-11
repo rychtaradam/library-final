@@ -77,6 +77,13 @@ class Db:
         except:
             return False
 
+    def read_genres(self):
+        try:
+            result = self.session.query(Genre).all()
+            return result
+        except:
+            return False
+
     def create(self, book):
         try:
             self.session.add(book)
@@ -104,6 +111,14 @@ class Db:
     def create_author(self, author):
         try:
             self.session.add(author)
+            self.session.commit()
+            return True
+        except:
+            return False,
+
+    def create_genre(self, genre):
+        try:
+            self.session.add(genre)
             self.session.commit()
             return True
         except:

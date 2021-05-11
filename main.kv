@@ -33,6 +33,13 @@ BoxLayout:
         text: 'Autor'
         on_release: self.parent.menu_authors.open()
 
+    #MDDropDownItem:
+    #    id: genre_item
+    #    pos_hint: {'center_x': .5, 'center_y': .7}
+    #    size_hint_x: 1
+    #    text: 'Žánr'
+    #    on_release: self.parent.menu_genres.open()
+
 <AuthorContent>:
     orientation: 'vertical'
     size_hint_x: 1
@@ -42,4 +49,15 @@ BoxLayout:
     MDTextField:
         id: author_name
         text: 'Jméno autora'
+        pos_hint: {'center_x': .5, 'center_y': .9}
+
+<GenreContent>:
+    orientation: 'vertical'
+    size_hint_x: 1
+    size_hint_y: None
+    height: "100dp"
+
+    MDTextField:
+        id: genre_name
+        text: 'Název žánru'
         pos_hint: {'center_x': .5, 'center_y': .9}
